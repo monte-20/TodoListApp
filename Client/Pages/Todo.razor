@@ -1,0 +1,80 @@
+﻿@page "/todo"
+@page "/"
+@inject ITodoItemService TodoItemService
+@inject NavigationManager NavigationManager
+
+<PageTitle>Todo</PageTitle>
+
+<h1>Todo</h1>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>ID</th>
+			<th>Title</th>
+			<th>Descrition</th>
+			<th>Estimated Time</th>
+			<th>Status</th>
+			<th></th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in TodoItemService.TodoItems){
+
+		<tr>
+			<td>@item.Id</td>
+			<td>@item.Title</td>
+			<td>@item.Description</td>
+			<td>@generateEstimatedTime(item.Estimate)</td>
+			<td>@generateStatus(item.Done)</td>
+			<td>
+				<button class="btn btn-primary" @onclick="()=>ShowItem(item.Id)"><i class="oi oi-pencil"></i></button>
+				<button class="btn btn-danger" @onclick="()=>DeleteItem(item.Id)"><i class="oi oi-trash"></i></button>
+			</td>
+		</tr>
+		}
+	</tbody>
+
+</table>
+<br/>
+<br/>
+<button class="btn btn-primary" @onclick="addItem">Add New Item</button>
+
+
+
+
+@code {
+	protected override async Task OnInitializedAsync()
+	{
+		await TodoItemService.GetTodoItems();
+	}
+
+	private int generateEstimatedTime(int days)
+	{
+		Random random = new Random();
+
+		return days * random.Next(3, 8);
+	}
+
+	private String generateStatus(bool status)
+	{
+		if (status)
+			return "Finished";
+		return "Not Finished";
+	}
+
+	private void ShowItem(int id)
+	{
+		NavigationManager.NavigateTo($"todoitem/{id}");
+	}
+	
+	private void addItem()
+	{
+		NavigationManager.NavigateTo("todoitem");
+	}
+
+	private async void DeleteItem(int id)
+	{
+		await TodoItemService.DeleteTodoItem(id);
+	}
+}

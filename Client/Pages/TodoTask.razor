@@ -1,0 +1,78 @@
+﻿@page "/todoitem"
+@page "/todoitem/{id:int}"
+@inject ITodoItemService TodoItemService
+
+@if (Id == null)
+{
+	<PageTitle>Creat new item todo</PageTitle>
+	<h3>Creat new item todo</h3>
+}else
+{
+	<PageTitle>Update todo item</PageTitle>
+<h3>Update @item.Title</h3>	
+}
+
+<EditForm Model="item" OnValidSubmit="HandleSubmit">
+	 <DataAnnotationsValidator></DataAnnotationsValidator>
+	<div>
+		<label for="title">Title </label>
+		<InputText id="title" @bind-Value="item.Title" class="form-control"></InputText>
+	</div>	
+	<div>
+		<label for="description">Description </label>
+		<InputTextArea id="description" @bind-Value="item.Description" class="form-control"></InputTextArea>
+		
+	</div>	
+	<div>
+		<label for="estimate">Estimated Time </label>
+		<InputNumber id="estimate" @bind-Value="item.Estimate" class="form-control"></InputNumber>	
+	</div>	
+
+		<div>
+		<label for="done">Status:</label>
+		<br/>
+		<InputRadioGroup @bind-Value="item.Done" class="form-control" id="done">
+			<InputRadio Value=true/>Finished
+			<br/>
+			<InputRadio Value=false/>Not Finished
+		</InputRadioGroup>
+	</div>
+	<br/>
+	<button type="submit" class="btn btn-primary">@btnText</button>
+</EditForm>
+
+@code {
+
+	[Parameter]
+	public int? Id{ get; set; }
+
+	TodoItem item = new TodoItem();
+	string btnText = string.Empty;
+
+	protected override async Task OnInitializedAsync()
+	{
+		btnText = Id == null ? "Add" : "Save";
+	}
+
+	protected override async Task OnParametersSetAsync()
+	{
+		if(Id != null)
+		{
+			item = await TodoItemService.GetSingleTodoItem((int)Id);
+		}
+		
+	}
+	
+	async Task HandleSubmit(){
+		
+		if(Id == null)
+		{
+			await TodoItemService.CreateTodoItem(item);
+		}
+		else
+		{
+			await TodoItemService.UpdateTodoItem(item);
+		}
+
+	}
+}
